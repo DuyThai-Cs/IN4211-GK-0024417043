@@ -52,3 +52,32 @@ Từ `Cancelled` không có mũi tên đi ra, vì phiếu đã huỷ không đ�
 1. **SRP (Single Responsibility)**: dòng 6-14. Một phương thức làm 4 việc: kiểm tra dữ liệu (dòng 6-7), lưu SQL (dòng 8-9), ghi log ra file (dòng 10), gửi thông báo (dòng 11-14). Đổi cách lưu, ghi log hay gửi thông báo đều phải sửa `EventService`.
 2. **OCP (Open/Closed)**: dòng 11-14. Chuỗi `if/else if` theo `channel`; thêm kênh mới (ví dụ "push") phải sửa code của `CreateEvent` thay vì chỉ thêm lớp mới.
 3. **DIP (Dependency Inversion)**: dòng 8, 12, 14. Lớp nghiệp vụ tự `new SqlConnection`, `new EmailSender`, `new SmsSender`, tức phụ thuộc trực tiếp vào lớp cụ thể, nên không thay thế hay mock để test được.
+
+## Câu 4b) git merge và git rebase
+
+- **git merge**: gộp nhánh bằng một merge commit, giữ nguyên lịch sử gốc của cả hai nhánh (lịch sử có dạng rẽ nhánh, không thay đổi commit cũ).
+- **git rebase**: "dời" các commit của nhánh hiện tại lên đầu nhánh đích bằng cách tạo lại các commit mới (SHA mới), cho lịch sử thẳng một đường, gọn hơn.
+
+**Không nên dùng rebase** khi nhánh đã được push và người khác đang dùng chung (ví dụ `main`, nhánh dùng chung của nhóm), vì rebase viết lại lịch sử, buộc phải `push --force`, làm lịch sử của đồng đội bị lệch và dễ xung đột. Trường hợp này dùng merge. Rebase chỉ nên dùng trên nhánh cá nhân chưa chia sẻ.
+
+## Câu 5a) Sơ đồ bốn lớp và chiều phụ thuộc
+
+```mermaid
+flowchart TD
+    API["API<br/>EventsController"]
+    INF["Infrastructure<br/>InMemoryEventRepository"]
+    APP["Application<br/>EventService"]
+    DOM["Domain<br/>Event, IEventRepository"]
+
+    API --> APP
+    API --> INF
+    INF --> APP
+    APP --> DOM
+    INF --> DOM
+```
+
+Mũi tên chỉ chiều phụ thuộc (A → B nghĩa là A tham chiếu B). Mọi mũi tên hướng vào trong về phía Domain. API tham chiếu Infrastructure chỉ để đăng ký DI trong `Program.cs`.
+
+## Câu 5b) Vì sao Domain không được tham chiếu Infrastructure
+
+Theo Dependency Rule, lớp trong (Domain chứa luật nghiệp vụ) không được biết gì về lớp ngoài (cơ sở dữ liệu, framework), nếu không đổi công nghệ lưu trữ sẽ kéo theo sửa Domain. Ngoài ra, Infrastructure đã phụ thuộc Domain nên Domain tham chiếu ngược lại sẽ tạo vòng tham chiếu và .NET không biên dịch được. Vì vậy Domain chỉ khai báo `IEventRepository`, còn Infrastructure cài đặt (Dependency Inversion).
