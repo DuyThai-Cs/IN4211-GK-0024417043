@@ -1,0 +1,15 @@
+using EduHub.Domain.Entities;
+using EduHub.Domain.Interfaces;
+
+namespace EduHub.Infrastructure.Repositories;
+
+public class InMemoryEventRepository : IEventRepository
+{
+    private static readonly List<Event> _events = new();
+    private static readonly object _lock = new();
+
+    public void Add(Event ev)
+    {
+        lock (_lock) _events.Add(ev);
+    }
+}
