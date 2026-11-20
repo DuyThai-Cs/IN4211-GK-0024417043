@@ -23,4 +23,13 @@ public class EventService
         notifier.Send($"Sự kiện mới: {ev.Title}");
         return ev;
     }
+    public IEnumerable<Event> GetByClub(Guid clubId) => _repository.GetByClubId(clubId);
+
+    public Event? GetById(Guid id) => _repository.GetById(id);
+
+    public void Delete(Guid id)
+    {
+        if (!_repository.Remove(id))
+            throw new KeyNotFoundException($"Không tìm thấy sự kiện {id}.");
+    }
 }

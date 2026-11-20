@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EduHub.Application\EduHub.Application.csproj" />
+    <ProjectReference Include="..\EduHub.Domain\EduHub.Domain.csproj" />
   </ItemGroup>
 
 </Project>
